@@ -21,3 +21,7 @@ select {
   font-size: 1em;
   margin: 0.5em;
 }
+
+.done {
+  text-decoration: line-through;
+}
