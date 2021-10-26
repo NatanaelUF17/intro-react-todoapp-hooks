@@ -1,93 +1,61 @@
-import React, { useState, useCallback, useEffect } from "react";
+import { useState } from "react";
+import NewTodoForm from "./components/NewTodoForm";
+import TodoList from './components/TodoList';
 
 function App() {
-  const [newTodo, setNewTodo] = useState("");
   const [todos, setTodos] = useState([]);
 
-  const onNewTodoChange = useCallback((event) => {
-    setNewTodo(event.target.value);
-  }, []);
+  const addTodo = (newTodo) => {
+    setTodos([...todos, newTodo]);
+  };
 
-  // TODO: Adding the todo values to the todos arrays and clean up the input
-  const formSubmitted = useCallback(
-    (event) => {
-      event.preventDefault();
-      if (!newTodo.trim()) return;
-      setTodos([
-        {
-          id: todos.length ? todos[0].id + 1 : 1,
-          content: newTodo,
-          done: false,
-        },
-        ...todos
-      ]);
-      setNewTodo("");
-    },
-    [newTodo, todos]
-  );
+  const removeTodo = (id) => {
+    setTodos(todos.filter((todo) => todo.id !==id));
+  };
 
-  // TODO: Adding new todo to the array
-  const addTodo = useCallback(
-    (todo, index) => (event) => {
-      const newTodos = [...todos];
-      newTodos.splice(index, 1, {
-        ...todo,
-        done: !todo.done,
-      });
-      setTodos(newTodos);
-    },
-    [todos]
-  );
-  
-  // TODO: Remove specific todo from the todos array
-  const removeTodo = useCallback((todo) => (event) => {
-    setTodos(todos.filter(otherTodo => otherTodo !== todo));
-  }, [todos]);
+  const removeDoneTodos = (id) => {
+    setTodos(todos.filter((todo) => !todo.is_done));
+  };
 
-  // TODO: Mark all todo done
-  const markAllDone = useCallback(() => {
+  const toggleDone = (id) => {
     const updatedTodos = todos.map((todo) => {
-      return {
-        ...todo,
-        done: true
+      if (todo.id === id) {
+        return  {
+          ...todo,
+          is_done: !todo.is_done,
+        };
       }
+      return todo;
     });
-    setTodos(updatedTodos);
-  }, [todos]);
 
-  // TODO: Using useEffect to call todos once at the beginning
-  useEffect(() => {
-    console.log("todos", todos);
-  }, [todos]);
+    setTodos(updatedTodos);
+  };
+
+  const markAllDone = () => {
+    setTodos(todos.map((todo) => {
+      if (!todo.is_done) {
+        return {
+          ...todo,
+          is_done: true,
+        };
+      }
+      return todo;
+    }));
+  };
 
   return (
     <div>
-      <form onSubmit={formSubmitted}>
-        <label htmlFor="newTodo">Enter a Todo:</label>
-        <input
-          id="newTodo"
-          name="newTodo"
-          value={newTodo}
-          onChange={onNewTodoChange}
-        />
-        <button onClick={addTodo}>Add Todo</button>
-      </form>
+      <NewTodoForm addTodo={addTodo} />
       <button onClick={markAllDone}>Mark All Done</button>
-      <ul>
-        {todos.map((todo, index) => (
-          <li key={todo.id}>
-            <input
-              type="checkbox"
-              checked={todo.done}
-              onChange={addTodo(todo, index)}
-            />
-            <span className={todo.done ? 'done' : ''}>{todo.content}</span>
-            <button onClick={removeTodo(todo)}>Remove Todo</button>
-          </li>
-        ))}
-      </ul>
+      <button onClick={removeDoneTodos}>Remove Done</button>
+      <TodoList 
+        todos={todos}
+        removeTodo={removeTodo}
+        toggleDone={toggleDone}
+      />
     </div>
   );
 }
 
 export default App;
+
